@@ -1,7 +1,7 @@
 # Use a imagem oficial do PHP com Alpine
 FROM php:8.2-fpm-alpine
 
-# Instale dependências do sistema (etapa dividida para melhor cache)
+# 1. Instale dependências do sistema
 RUN apk add --no-cache \
     git \
     curl \
@@ -12,19 +12,7 @@ RUN apk add --no-cache \
     libxml2-dev \
     oniguruma-dev
 
-# Dependências específicas para MongoDB (instaladas separadamente)
-RUN apk add --no-cache --virtual .build-deps \
-    autoconf \
-    g++ \
-    make \
-    openssl-dev
-
-# Instale extensão MongoDB via PECL
-RUN pecl install mongodb \
-    && docker-php-ext-enable mongodb \
-    && apk del .build-deps
-
-# Instale extensões PHP essenciais
+# 2. Instale extensões PHP (removi MongoDB conforme solicitado)
 RUN docker-php-ext-install \
     pdo \
     pdo_pgsql \
@@ -32,38 +20,29 @@ RUN docker-php-ext-install \
     bcmath \
     opcache
 
-# Instale o Composer globalmente
+# 3. Instale o Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Configure o diretório de trabalho
+# 4. Configure diretório de trabalho
 WORKDIR /var/www/html
 
-# 1. Copie apenas os arquivos necessários para instalação inicial
+# 5. Copie arquivos do composer primeiro (otimização de cache)
 COPY composer.json composer.lock ./
 
-# 2. Instale dependências SEM executar scripts
+# 6. Instale dependências (sem scripts)
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts --ignore-platform-reqs
 
-# 3. Copie o resto da aplicação
+# 7. Copie todo o código fonte
 COPY . .
 
-# 4. Execute scripts pós-instalação
+# 8. Execute scripts pós-instalação
 RUN composer run-script post-autoload-dump
 
-# Ajuste permissões
+# 9. Ajuste permissões
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 755 storage bootstrap/cache
 
-# Porta de exposição
+# 10. Exponha a porta
 EXPOSE 8080
 
-
-RUN echo "Preparando para executar migrações..."
-
-# Script de entrypoint para controle de migrações
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-
-# Comando de inicialização
-CMD ["sh", "-c", "php artisan migrate:fresh --force && php artisan queue:work --tries=3 --timeout=30 & php artisan serve --host=0.0.0.0 --port=8080"]
+CMD sh -c "php artisan migrate --force && php artisan queue:work --tries=3 --timeout=30 & php artisan serve --host=0.0.0.0 --port=8080"
