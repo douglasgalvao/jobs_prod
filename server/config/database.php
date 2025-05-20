@@ -111,17 +111,17 @@ return [
             // 'encrypt' => env('DB_ENCRYPT', 'yes'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
-        'mongodb' => [
-            'driver' => 'mongodb',
-            'host' => env('MDB_HOST', '127.0.0.1'),
-            'port' => env('MDB_PORT', 27017),
-            'database' => env('MDB_DATABASE', 'studentsjobs_mongodb'),
-            'username' => env('MDB_USERNAME', 'meuUsuarioAdmin'),
-            'password' => env('MDB_PASSWORD', 'minhaSenhaSegura'),
-            'options' => [
-                'authSource' => 'admin',
-            ],
-        ],
+        // 'mongodb' => [
+        //     'driver' => 'mongodb',
+        //     'host' => env('MDB_HOST', '127.0.0.1'),
+        //     'port' => env('MDB_PORT', 27017),
+        //     'database' => env('MDB_DATABASE', 'studentsjobs_mongodb'),
+        //     'username' => env('MDB_USERNAME', 'meuUsuarioAdmin'),
+        //     'password' => env('MDB_PASSWORD', 'minhaSenhaSegura'),
+        //     'options' => [
+        //         'authSource' => 'admin',
+        //     ],
+        // ],
 
 
 
