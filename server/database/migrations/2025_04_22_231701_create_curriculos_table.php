@@ -5,7 +5,7 @@ use MongoDB\Laravel\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    protected $connection = 'mongodb';
+    // protected $connection = 'mongodb';
 
     /**
      * Run the migrations.
