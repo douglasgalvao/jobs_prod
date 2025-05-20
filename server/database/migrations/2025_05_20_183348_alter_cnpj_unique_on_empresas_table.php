@@ -10,9 +10,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('empresas', function (Blueprint $table) {
-            $table->dropUnique(['cnpj']); // Remove a constraint de unicidade
-        });
+       
     }
 
     /**
