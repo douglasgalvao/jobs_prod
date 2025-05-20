@@ -26,10 +26,10 @@ class VagaController extends Controller
         ]);
         $empresa = Auth::user()->empresa;
 
-        return response()->json([
-            'mensagem' => $empresa,
-        ], 404);
-
+        if (!$empresa) {
+            return response()->json(['mensagem' => 'Empresa não encontrada'], 404);
+        }
+    
         $vaga = [
             'empresa_id' => $empresa->id,
             'titulo' => $data['titulo'],

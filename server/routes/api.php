@@ -24,10 +24,13 @@ Route::post('auth/register', [\App\Http\Controllers\AuthController::class, 'regi
 Route::post('create-session', [ChatController::class, 'store']);
 Route::post('auth/login', [\App\Http\Controllers\AuthController::class, 'login']);
 Route::post('auth/login/firebase', [\App\Http\Controllers\AuthController::class, 'loginWithFirebase']); // Firebase
+ 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('empresas')->middleware([\App\Http\Middleware\EmpresaValida::class])->group(function () {
         Route::post('/vagas/cadastrar', [\App\Http\Controllers\EmpresaController::class, 'store']);
     });
+
+    Route::post('/vagas', [\App\Http\Controllers\VagaController::class, 'store']);
 
     Route::post('send-message', [MessageController::class, 'sendMessage']);
     Route::get('chat-sessions/{sessionId}/history', [MessageController::class, 'mountHistoryBySessionId']);
