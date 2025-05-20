@@ -1,20 +1,21 @@
-# Use uma imagem oficial com PHP e FPM
-FROM php:8.2-fpm
+# Use a imagem oficial do PHP com Alpine (mais leve)
+FROM php:8.2-fpm-alpine
 
-# Instale dependências do sistema e extensões PHP
-RUN apt-get update && apt-get install -y \
+# Instale dependências do sistema
+RUN apk add --no-cache \
     git \
     curl \
     zip \
     unzip \
-    libpq-dev \
+    postgresql-dev \
     libzip-dev \
-    libonig-dev \
     libxml2-dev \
-    libcurl4-openssl-dev \
-    libmongoc-dev \
+    oniguruma-dev \
+    # Extensões MongoDB
+    mongodb-dev \
     && pecl install mongodb \
     && docker-php-ext-enable mongodb \
+    # Extensões PHP essenciais
     && docker-php-ext-install \
         pdo \
         pdo_pgsql \
@@ -25,17 +26,20 @@ RUN apt-get update && apt-get install -y \
 # Instale o Composer globalmente
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Configure o diretório de trabalho (use caminho padrão)
+# Configure o diretório de trabalho padrão
 WORKDIR /var/www/html
 
-# Copie apenas os arquivos necessários inicialmente (para cache otimizado)
+# 1. Copie apenas os arquivos necessários para instalação inicial
 COPY composer.json composer.lock ./
 
-# Instale dependências (ignorando extensões faltantes temporariamente)
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs
+# 2. Instale dependências SEM executar scripts
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts --ignore-platform-reqs
 
-# Copie o resto da aplicação
+# 3. Copie o resto da aplicação
 COPY . .
+
+# 4. Execute scripts pós-instalação (agora com todos arquivos no lugar)
+RUN composer run-script post-autoload-dump
 
 # Ajuste permissões
 RUN chown -R www-data:www-data /var/www \
