@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Vaga;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class VagaController extends Controller
@@ -24,6 +25,9 @@ class VagaController extends Controller
             'descricao' => 'required|string',
             'requisitos' => 'nullable|string',
         ]);
+        
+        // dd(Auth::user());
+
         $empresa = Auth::user()->empresa;
 
         if (!$empresa) {
