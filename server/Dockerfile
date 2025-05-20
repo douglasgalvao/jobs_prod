@@ -1,7 +1,7 @@
-# Use a imagem oficial do PHP com Alpine (mais leve)
+# Use a imagem oficial do PHP com Alpine
 FROM php:8.2-fpm-alpine
 
-# Instale dependências do sistema
+# Instale dependências do sistema (etapa dividida para melhor cache)
 RUN apk add --no-cache \
     git \
     curl \
@@ -10,23 +10,32 @@ RUN apk add --no-cache \
     postgresql-dev \
     libzip-dev \
     libxml2-dev \
-    oniguruma-dev \
-    # Extensões MongoDB
-    mongodb-dev \
-    && pecl install mongodb \
+    oniguruma-dev
+
+# Dependências específicas para MongoDB (instaladas separadamente)
+RUN apk add --no-cache --virtual .build-deps \
+    autoconf \
+    g++ \
+    make \
+    openssl-dev
+
+# Instale extensão MongoDB via PECL
+RUN pecl install mongodb \
     && docker-php-ext-enable mongodb \
-    # Extensões PHP essenciais
-    && docker-php-ext-install \
-        pdo \
-        pdo_pgsql \
-        zip \
-        bcmath \
-        opcache
+    && apk del .build-deps
+
+# Instale extensões PHP essenciais
+RUN docker-php-ext-install \
+    pdo \
+    pdo_pgsql \
+    zip \
+    bcmath \
+    opcache
 
 # Instale o Composer globalmente
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Configure o diretório de trabalho padrão
+# Configure o diretório de trabalho
 WORKDIR /var/www/html
 
 # 1. Copie apenas os arquivos necessários para instalação inicial
@@ -38,7 +47,7 @@ RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoload
 # 3. Copie o resto da aplicação
 COPY . .
 
-# 4. Execute scripts pós-instalação (agora com todos arquivos no lugar)
+# 4. Execute scripts pós-instalação
 RUN composer run-script post-autoload-dump
 
 # Ajuste permissões
