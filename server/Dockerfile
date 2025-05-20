@@ -57,5 +57,13 @@ RUN chown -R www-data:www-data /var/www \
 # Porta de exposição
 EXPOSE 8080
 
+
+RUN echo "Preparando para executar migrações..."
+
+# Script de entrypoint para controle de migrações
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+
 # Comando de inicialização
 CMD ["sh", "-c", "php artisan migrate --force && php artisan queue:work --tries=3 --timeout=30 & php artisan serve --host=0.0.0.0 --port=8080"]
