@@ -1,0 +1,37 @@
+# Use uma imagem oficial com PHP, Composer e extensões
+FROM php:8.2-fpm
+ 
+# Instale dependências do sistema
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    zip \
+    unzip \
+    libpq-dev \
+    libzip-dev \
+    libonig-dev \
+    libxml2-dev \
+    libcurl4-openssl-dev \
+    && docker-php-ext-install pdo pdo_pgsql zip
+
+# Instale o Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Crie diretório da app
+WORKDIR /home/douglas/Desktop/MyJobs/pmg-es-2025-1-ti5-myjobs/code/server
+
+# Copie os arquivos da aplicação
+COPY . .
+
+# Instale dependências PHP
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+
+# Ajuste permissões
+RUN chown -R www-data:www-data /var/www \
+    && chmod -R 755 /var/www/storage /var/www/bootstrap/cache
+
+# Porta que o Railway espera
+EXPOSE 8080
+
+# Comando final que roda a migration e inicia o servidor
+CMD php artisan migrate --force && php artisan queue:work --daemon & php artisan serve --host=0.0.0.0 --port=8080
