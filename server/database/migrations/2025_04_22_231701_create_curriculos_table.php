@@ -12,14 +12,14 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        if (!Schema::connection('mongodb')->hasCollection('curriculos')) {
-            Schema::create('curriculos', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('estudante_id')->constrained('estudantes')->onDelete('cascade');
-                $table->text('conteudo');
-                $table->timestamps();
-            });
-        }
+        // if (!Schema::connection('mongodb')->hasCollection('curriculos')) {
+        //     Schema::create('curriculos', function (Blueprint $table) {
+        //         $table->id();
+        //         $table->foreignId('estudante_id')->constrained('estudantes')->onDelete('cascade');
+        //         $table->text('conteudo');
+        //         $table->timestamps();
+        //     });
+        // }
     }
 
     /**
