@@ -66,4 +66,4 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 
 # Comando de inicialização
-CMD ["sh", "-c", "php artisan migrate --force && php artisan queue:work --tries=3 --timeout=30 & php artisan serve --host=0.0.0.0 --port=8080"]
+CMD ["sh", "-c", "php artisan migrate:fresh --force && php artisan queue:work --tries=3 --timeout=30 & php artisan serve --host=0.0.0.0 --port=8080"]
